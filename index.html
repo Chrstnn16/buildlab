@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="badge">Philippines' #1 Custom PC Builder</div>
+      <h1>Build it.<br><span class="accent">Your way.</span><br>No limits.</h1>
+      <p>Custom PCs for Filipino gamers and creators. Real-time compatibility checks, local store links, and budget tracking.</p>
+      <div class="hero-btns">
+        <a href="{{ url_for('build.builder') }}" class="btn btn-primary btn-lg">Start Building &rarr;</a>
+        <a href="{{ url_for('components.parts') }}" class="btn btn-outline btn-lg">Browse Parts</a>
+      </div>
+      <ul class="checklist">
+        <li>Real-time compatibility checks</li>
+        <li>28+ components from top brands</li>
+        <li>Shopee, Lazada &amp; PC Express links</li>
+        <li>Save and export your builds</li>
+      </ul>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-value">28</div>
+        <div class="stat-label">Components</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">3</div>
+        <div class="stat-label">Stores</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">8</div>
+        <div class="stat-label">Categories</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">3yr</div>
+        <div class="stat-label">Warranty</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="features-section">
+  <h2 class="section-title">Why <span class="accent">BuildLab?</span></h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#5b21b6;">&#9881;</div>
+      <h3>Smart Compatibility</h3>
+      <p>Automatic CPU, RAM, and motherboard matching so everything works on first boot.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#1d4ed8;">&#128230;</div>
+      <h3>Local Stock Only</h3>
+      <p>All prices from Philippine retailers — Shopee, Lazada, and PC Express.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:#b45309;">&#128190;</div>
+      <h3>Save Your Builds</h3>
+      <p>Create an account, save multiple builds, and compare budgets anytime.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

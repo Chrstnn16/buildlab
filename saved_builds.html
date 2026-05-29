@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}My Builds{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>My Builds</h1>
+  <a href="{{ url_for('build.builder') }}" class="btn btn-primary">New Build</a>
+</div>
+
+{% if builds %}
+<div class="builds-grid">
+  {% for build in builds %}
+  <div class="build-card" id="build-card-{{ build.id }}">
+    <div class="build-card-header">
+      <h3 id="build-name-{{ build.id }}">{{ build.name }}</h3>
+      <span class="build-date">{{ build.created_at.strftime('%b %d, %Y') }}</span>
+    </div>
+    <div class="build-card-body">
+      <p>{{ build.component_ids | from_json | length }} components selected</p>
+    </div>
+    <div class="build-card-footer">
+      <a href="{{ url_for('build.builder') }}?build_id={{ build.id }}" class="btn btn-ghost btn-sm">Load</a>
+      <button onclick="renameBuild({{ build.id }}, '{{ build.name | replace("'", "\\'") }}')" class="btn btn-ghost btn-sm">Edit</button>
+      <a href="{{ url_for('build.export_build', build_id=build.id) }}" class="btn btn-ghost btn-sm">&#8595; Export</a>
+      <button onclick="deleteBuild({{ build.id }})" class="btn btn-danger btn-sm">Delete</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <p>No saved builds yet.</p>
+  <a href="{{ url_for('build.builder') }}" class="btn btn-primary">Create your first build</a>
+</div>
+{% endif %}
+
+<!-- Rename modal -->
+<div id="rename-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:200; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(6px);">
+  <div style="background:#13131f; border-radius:16px; width:100%; max-width:420px; border:1px solid rgba(255,255,255,.09); padding:28px;">
+    <h3 style="font-size:17px; font-weight:900; margin-bottom:16px;">Rename Build</h3>
+    <input type="text" id="rename-input" class="form-input" style="width:100%; margin-bottom:20px;" placeholder="Build name">
+    <input type="hidden" id="rename-build-id">
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button onclick="closeRenameModal()" class="btn btn-ghost">Cancel</button>
+      <button onclick="submitRename()" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function deleteBuild(id) {
+  if (!confirm('Delete this build? This cannot be undone.')) return;
+  fetch('/api/builds/' + id, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { alert(data.error); return; }
+      const card = document.getElementById('build-card-' + id);
+      if (card) card.remove();
+      const grid = document.querySelector('.builds-grid');
+      if (grid && !grid.children.length) {
+        grid.outerHTML = '<div class="empty-state"><p>No saved builds yet.</p><a href="/builder" class="btn btn-primary">Create your first build</a></div>';
+      }
+    })
+    .catch(() => alert('Delete failed.'));
+}
+
+function renameBuild(id, currentName) {
+  document.getElementById('rename-build-id').value = id;
+  document.getElementById('rename-input').value = currentName;
+  const modal = document.getElementById('rename-modal');
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('rename-input').focus(), 50);
+}
+
+function closeRenameModal() {
+  document.getElementById('rename-modal').style.display = 'none';
+}
+
+function submitRename() {
+  const id   = document.getElementById('rename-build-id').value;
+  const name = document.getElementById('rename-input').value.trim();
+  if (!name) { alert('Please enter a name.'); return; }
+  fetch('/api/builds/' + id + '/rename', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) { alert(data.error); return; }
+      const nameEl = document.getElementById('build-name-' + id);
+      if (nameEl) nameEl.textContent = name;
+      closeRenameModal();
+    })
+    .catch(() => alert('Rename failed.'));
+}
+
+document.getElementById('rename-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeRenameModal();
+});
+</script>
+{% endblock %}

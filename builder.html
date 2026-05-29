@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}PC Builder{% endblock %}
+
+{% block content %}
+<div class="builder-layout">
+
+  <!-- Left: component browser -->
+  <div class="builder-left">
+    <h3>Components</h3>
+    <input type="text" id="component-search" placeholder="Search..." oninput="filterComponents(this.value)" class="search-input">
+    <div class="cat-pills" id="cat-pills">
+      <button class="filter-pill active" onclick="setCat('ALL',this)">All</button>
+      {% for cat in categories %}
+        <button class="filter-pill" onclick="setCat('{{ cat }}',this)">{{ cat }}</button>
+      {% endfor %}
+    </div>
+    <div id="component-list" class="component-list">
+      {% for c in components %}
+      <div class="component-card" data-cat="{{ c.category }}" data-name="{{ c.name }}" data-id="{{ c.id }}"
+           draggable="true" ondragstart="onDragStart(event,{{ c.id }},'{{ c.category }}')"
+           onclick="addToSlot({{ c.id }}, '{{ c.name }}', '{{ c.brand }}', '{{ c.category }}', {{ c.price }})">
+        <div class="cc-header cat-{{ c.category | lower | replace(' ','- ') }}">{{ c.category }}</div>
+        <div class="cc-body">
+          <div class="cc-name">{{ c.name }}</div>
+          <div class="cc-price">&#8369;{{ '{:,.0f}'.format(c.price) }}</div>
+          <div class="cc-brand">{{ c.brand }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Right: build slots -->
+  <div class="builder-right">
+    <div class="build-topbar">
+      <div>
+        <div class="topbar-label">Build Name</div>
+        <h2 id="build-name" contenteditable="true">My Build</h2>
+      </div>
+      <div class="topbar-actions">
+        <button onclick="checkCompat()" class="btn btn-ghost">Check Compat</button>
+        <button onclick="exportBuild()" class="btn btn-ghost">&#8595; Export</button>
+        <button onclick="saveBuild()" class="btn btn-primary">Save Build</button>
+      </div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span>Progress <span id="prog-label">0/8</span></span>
+        <span id="build-total" class="total-price">&#8369;0</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="prog-bar" style="width:0%"></div></div>
+    </div>
+
+    <div class="template-bar">
+      <span class="topbar-label">Template</span>
+      <button onclick="loadTemplate('budget')" class="btn btn-ghost">Budget</button>
+      <button onclick="loadTemplate('mid')" class="btn btn-ghost">Mid-Range</button>
+      <button onclick="loadTemplate('gaming')" class="btn btn-ghost">Gaming</button>
+      <button onclick="clearBuild()" class="btn btn-danger" style="margin-left:auto;">Clear</button>
+    </div>
+
+    <div id="compat-result" style="display:none;" class="compat-banner"></div>
+
+    <div id="slots" class="slots-list">
+      {% for cat in ["CPU","Motherboard","GPU","RAM","Storage","PSU","Cooling","Case"] %}
+      <div class="slot" id="slot-{{ cat }}" data-cat="{{ cat }}"
+           ondragover="event.preventDefault(); onDragOver(event,'{{ cat }}')"
+           ondragleave="onDragLeave(event)"
+           ondrop="onDrop(event,'{{ cat }}')">
+        <div class="slot-icon cat-{{ cat | lower }}">
+          <span>{{ {"CPU":"⚙","Motherboard":"🔌","GPU":"🖥","RAM":"🧩","Storage":"💾","PSU":"⚡","Cooling":"❄","Case":"📦"}[cat] }}</span>
+        </div>
+        <div class="slot-info">
+          <div class="slot-cat">{{ cat }}</div>
+          <div class="slot-empty-text">Click or drag a component here</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/builder.js') }}"></script>
+{% endblock %}
